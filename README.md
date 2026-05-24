@@ -31,6 +31,17 @@ So the skill gates on a **break-even rule**: only delegate when the mechanical w
 - Always summarize a subagent's result back into the main context — subagent summaries are lossy.
 - The main thread is the orchestrator; routing is never itself routed.
 
+## Two outlets, one gate
+
+When work clears the break-even gate, there are two ways to run it cheaper — the skill picks based on shape:
+
+- **Delegate to a subagent** — for a discrete chunk you can offload while you keep working on the main thread. Autonomous; runs on the cheaper model in its own context.
+- **Prompt-to-switch the main thread** — for a *sustained* stretch of cheap work, where the cheapest place to run it is the main conversation itself, on a cheaper model. A skill can't run `/model` (only the user can switch the live session model), so it surfaces the exact command — e.g. `/model haiku` — and prompts you once, then prompts again to switch back up when judgment work resumes.
+
+Same gate, never both for the same work. Below the gate: stay inline, no prompt, no subagent.
+
+(No recursion: subagents don't route. In Claude Code a subagent isn't given the dispatch tool, so the orchestration tree stays one level deep — a subagent that uncovers a big new job reports up and the main thread decides. Flat fan-out beats deep nesting.)
+
 ## Install
 
 ### 1. Drop in the skill

@@ -5,8 +5,14 @@ description: Use when deciding whether to delegate a task to a cheaper-model sub
 
 # Model Router — Cost-Routing Discipline
 
-A skill CANNOT switch the running model. It routes *work* to cheaper-model
-subagents via the `Agent` tool's `model` param (`haiku` | `sonnet` | `opus`).
+A skill CANNOT switch the running model itself. Two outlets, **same break-even
+gate** (below):
+- **Delegate** a subtask to a cheaper-model subagent via the `Agent` tool's
+  `model` param (`haiku` | `sonnet` | `opus`) — autonomous, for one chunk.
+- **Prompt-to-switch** the main thread — when the *whole next stretch* is cheap
+  work, offer the user the `/model` command (only the user can switch the live
+  session model). See "Prompt-to-Switch Mode".
+
 The main Opus thread stays the orchestrator and keeps reasoning work.
 
 ## Break-Even Gate (run FIRST, every time)
@@ -43,6 +49,31 @@ sonnet minimum, NEVER haiku.
 4. Multiple cheap items? → batch into ONE subagent call.
 5. Else → dispatch to the matching tier, then **summarize the result back into
    main context** before continuing.
+
+## Prompt-to-Switch Mode (main-thread routing)
+
+Subagents route a *subtask*. When the work that clears the gate is the **next
+sustained stretch of the main conversation** (not a one-off chunk to offload),
+the cheaper place to run it is the main thread itself — on a cheaper model.
+
+The skill cannot run `/model`; only the user can switch the live session model.
+So the skill *offers* it, at the **exact same break-even gate** used for
+delegation — no separate threshold:
+
+1. Gate passes (mechanical work > ~1.5k tokens, coordination < 30% of savings)
+   **and** the cheap work is sustained main-thread work (not a discrete subtask
+   better handled by a subagent).
+2. Offer once: name the tier and hand the user the exact command, e.g.
+   `Run /model haiku — the next stretch is mechanical (estimated ~Nk tokens).
+   I'll suggest /model opus when judgment work resumes.`
+3. User runs `/model <tier>` (user action). Next turn runs on the cheaper model.
+4. When judgment/behavior/coupling work resumes, prompt once to switch back up.
+
+**Same gate, two outlets:** below the gate → inline on the current model, no
+prompt, no subagent. Above it → either dispatch a subagent (one chunk) OR
+prompt-to-switch the main thread (sustained stretch). Never both for the same
+work. Don't prompt-to-switch more than once per stretch — toggling models every
+turn is worse than staying put.
 
 ## Guardrails (hard rules)
 
