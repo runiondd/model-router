@@ -13,7 +13,7 @@ gate** (below):
   work, offer the user the `/model` command (only the user can switch the live
   session model). See "Prompt-to-Switch Mode".
 
-The main Opus thread stays the orchestrator and keeps reasoning work.
+The main thread (your top-tier model) stays the orchestrator and keeps reasoning work.
 
 ## Break-Even Gate (run FIRST, every time)
 
@@ -24,20 +24,22 @@ summarized result + coordination). Delegating small work LOSES money.
 - Estimated mechanical work is **> ~1.5k tokens**, AND
 - Coordination cost is **< 30%** of the expected savings.
 
-If either fails → **do it inline on Opus. Stop.**
+If either fails → **do it inline on the top-tier model. Stop.**
 
 ## Routing Taxonomy
 
 Only truly mechanical, no-judgment work is haiku-eligible. Anything touching
-product behavior, logic, or coupling stays on Opus regardless of file count.
+product behavior, logic, or coupling stays on the top-tier model regardless of file count.
 
 | Tier | Use for | Dispatch to |
 |------|---------|-------------|
-| **haiku** (only when gate passes) | "where is X" code/symbol location; log/output scans for a known pattern; mechanical renames; pure format/whitespace edits; reading files to extract specific values; template boilerplate with no logic | `cavecrew-investigator`, `cavecrew-builder`, or `Agent(model: haiku)` |
-| **sonnet** (default for light judgment) | writing tests for existing code; focused diff review; single-file edits that touch logic but have a clear, unambiguous spec; doc/markdown from a fixed outline | `cavecrew-builder`, `cavecrew-reviewer`, `code-simplifier`, or `Agent(model: sonnet)` |
-| **opus / inline** (do NOT delegate) | architecture & design; multi-file refactors with coupling; debugging an unknown root cause; brainstorming/planning; any edit touching product behavior or cross-file coupling; the routing decision itself | keep on main thread |
+| **haiku** (only when gate passes) | "where is X" code/symbol location; log/output scans for a known pattern; mechanical renames; pure format/whitespace edits; reading files to extract specific values; template boilerplate with no logic | `Agent(model: "haiku")` |
+| **sonnet** (default for light judgment) | writing tests for existing code; focused diff review; single-file edits that touch logic but have a clear, unambiguous spec; doc/markdown from a fixed outline | `Agent(model: "sonnet")` |
+| **top-tier / inline** (do NOT delegate) | architecture & design; multi-file refactors with coupling; debugging an unknown root cause; brainstorming/planning; any edit touching product behavior or cross-file coupling; the routing decision itself | keep on main thread |
 
-**Hard rule:** if a change touches product behavior or coupling, stay on Opus —
+> If you have your own named cheap-tier subagents (e.g. a haiku investigator/builder), use them in place of the generic `Agent(model: ...)` calls.
+
+**Hard rule:** if a change touches product behavior or coupling, stay on the top-tier model —
 even if it looks like a single-file edit. Tests and diff review default to
 sonnet minimum, NEVER haiku.
 

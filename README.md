@@ -6,7 +6,7 @@ An always-on cost-routing skill for [Claude Code](https://docs.claude.com/en/doc
 
 A Claude Code "skill" is a markdown file loaded into the model's context. **A skill cannot switch the model the harness is running** — that's set per request by Claude Code, not something the model can reach up and change mid-session.
 
-So model-router doesn't pretend to. Instead it routes *work*: the main Opus thread stays the orchestrator and delegates bounded, low-judgment tasks to cheaper-model subagents (`haiku`, `sonnet`) via the `Agent` tool's `model` parameter. You capture most of the cost savings without the magic trick nobody can actually build.
+So model-router doesn't pretend to. Instead it routes *work*: the main thread (your top-tier model) stays the orchestrator and delegates bounded, low-judgment tasks to cheaper-model subagents (`haiku`, `sonnet`) via the `Agent` tool's `model` parameter. You capture most of the cost savings without the magic trick nobody can actually build.
 
 ## Why it's not just "always use the cheap model"
 
